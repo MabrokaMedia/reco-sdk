@@ -2,18 +2,18 @@ import axios, { AxiosInstance } from 'axios';
 import http from 'http';
 import https from 'https';
 import { 
-  RecombeOptions, 
-  RecombeItem, 
-  RecombeUser, 
-  RecombeInteraction, 
+  RecoOptions, 
+  RecoItem, 
+  RecoUser, 
+  RecoInteraction, 
   RecommendationRequest, 
   RecommendationResponse 
 } from './types';
 
-export class RecombeClient {
+export class RecoClient {
   private client: AxiosInstance;
 
-  constructor(options: RecombeOptions) {
+  constructor(options: RecoOptions) {
     // Default to localhost for now if not provided, or a placeholder production URL
     const baseURL = options.baseUrl || 'http://localhost:3000'; 
     
@@ -45,7 +45,7 @@ export class RecombeClient {
   /**
    * Track a single interaction
    */
-  async trackInteraction(interaction: RecombeInteraction): Promise<void> {
+  async trackInteraction(interaction: RecoInteraction): Promise<void> {
     // Fire and forget: We await the call but return void. 
     // In a real high-perf scenario, you might want to not await this at all in the main thread,
     // or use a background queue. Here we keep it simple but fast via keep-alive.
@@ -55,14 +55,14 @@ export class RecombeClient {
   /**
    * Sync a single item
    */
-  async upsertItem(item: RecombeItem): Promise<void> {
+  async upsertItem(item: RecoItem): Promise<void> {
     await this.client.post('/items', item);
   }
 
   /**
    * Sync multiple items (Batch)
    */
-  async batchUpsertItems(items: RecombeItem[]): Promise<void> {
+  async batchUpsertItems(items: RecoItem[]): Promise<void> {
     // Assuming the API supports batch upsert at /items/batch or similar
     // If not, this would need to map over them, but let's assume a bulk endpoint exists or main endpoint handles arrays
     await this.client.post('/items/batch', { items });
@@ -71,7 +71,7 @@ export class RecombeClient {
   /**
    * Sync a single user
    */
-  async upsertUser(user: RecombeUser): Promise<void> {
+  async upsertUser(user: RecoUser): Promise<void> {
     await this.client.post('/users', user);
   }
 }

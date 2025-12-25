@@ -1,21 +1,21 @@
-# @recombe/sdk
+# @reco/sdk
 
-Official TypeScript SDK for the Recombe API.
+Official TypeScript SDK for the Reco (Recombe) API.
 
 ## Installation
 
 ```bash
-npm install @recombe/sdk
+npm install @reco/sdk
 ```
 
 ## Usage
 
-Initialise the client with your API key.
+Initialize the client with your API key.
 
 ```typescript
-import { RecombeClient } from '@recombe/sdk';
+import { RecoClient } from '@reco/sdk';
 
-const client = new RecombeClient({
+const client = new RecoClient({
   apiKey: 'YOUR_API_KEY',
   baseUrl: 'https://api.recombe.ai' // Optional
 });

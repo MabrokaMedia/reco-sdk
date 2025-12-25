@@ -1,5 +1,5 @@
 {
-    "name": "@recombe/sdk",
+    "name": "@reco/sdk",
     "version": "0.1.0",
     "description": "TypeScript SDK for the Recombe API",
     "main": "dist/index.js",

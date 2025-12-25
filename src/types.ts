@@ -1,20 +1,20 @@
-export interface RecombeOptions {
+export interface RecoOptions {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;
 }
 
-export interface RecombeItem {
+export interface RecoItem {
   id: string;
   [key: string]: any;
 }
 
-export interface RecombeUser {
+export interface RecoUser {
   id: string;
   [key: string]: any;
 }
 
-export interface RecombeInteraction {
+export interface RecoInteraction {
   user_id: string;
   item_id: string;
   type: string;
@@ -29,6 +29,6 @@ export interface RecommendationRequest {
 }
 
 export interface RecommendationResponse {
-  recommendations: RecombeItem[];
+  recommendations: RecoItem[];
   recommendation_id: string;
 }
