@@ -74,4 +74,32 @@ export class RecoClient {
   async upsertUser(user: RecoUser): Promise<void> {
     await this.client.post('/users', user);
   }
+
+  /**
+   * Sync multiple users (Batch)
+   */
+  async batchUpsertUsers(users: RecoUser[]): Promise<void> {
+    await this.client.post('/users/bulk', { users });
+  }
+
+  /**
+   * Track multiple interactions (Batch)
+   */
+  async batchTrackInteractions(interactions: RecoInteraction[]): Promise<void> {
+    await this.client.post('/interactions/bulk', { interactions });
+  }
+
+  /**
+   * Delete an item
+   */
+  async deleteItem(itemId: string): Promise<void> {
+    await this.client.delete(`/items/${itemId}`);
+  }
+
+  /**
+   * Bulk delete items
+   */
+  async batchDeleteItems(itemIds: string[]): Promise<void> {
+    await this.client.post('/items/bulk-delete', { item_ids: itemIds });
+  }
 }
