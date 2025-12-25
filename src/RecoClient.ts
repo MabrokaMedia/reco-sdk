@@ -14,9 +14,19 @@ export class RecoClient {
   private client: AxiosInstance;
 
   constructor(options: RecoOptions) {
-    // Default to localhost for now if not provided, or a placeholder production URL
-    const baseURL = options.baseUrl || 'http://localhost:3000'; 
+    // Determine Base URL
+    let baseURL = options.baseUrl;
     
+    // If no specific baseURL provided, construct it from default host + project ID
+    if (!baseURL) {
+      const defaultHost = 'https://reco-api.mioren.com';
+      if (options.projectId) {
+        baseURL = `${defaultHost}/api/v1/projects/${options.projectId}`;
+      } else {
+        baseURL = defaultHost; // Fallback, though ideally projectId should be present
+      }
+    }
+
     // Optimization: Use Keep-Alive agents to reuse TCP connections
     // This significantly reduces latency for sequential requests
     const httpAgent = new http.Agent({ keepAlive: true });

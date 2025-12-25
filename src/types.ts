@@ -1,5 +1,6 @@
 export interface RecoOptions {
   apiKey: string;
+  projectId?: string;
   baseUrl?: string;
   timeout?: number;
 }
