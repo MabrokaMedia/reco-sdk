@@ -133,4 +133,20 @@ export class RecoClient {
     if (!itemIds || itemIds.length === 0) throw new Error("RecoSDK: Validation Error - itemIds array required.");
     await this.client.post('/items/bulk-delete', { item_ids: itemIds });
   }
+
+  /**
+   * Delete a user
+   */
+  async deleteUser(userId: string): Promise<void> {
+    if (!userId) throw new Error("RecoSDK: Validation Error - userId is required.");
+    await this.client.delete(`/users/${userId}`);
+  }
+
+  /**
+   * Bulk delete users
+   */
+  async batchDeleteUsers(userIds: string[]): Promise<void> {
+    if (!userIds || userIds.length === 0) throw new Error("RecoSDK: Validation Error - userIds array required.");
+    await this.client.post('/users/bulk-delete', { user_ids: userIds });
+  }
 }
