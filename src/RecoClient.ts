@@ -27,10 +27,6 @@ export class RecoClient {
       }
     }
 
-    // Optimization: Use Keep-Alive agents to reuse TCP connections
-    const httpAgent = new http.Agent({ keepAlive: true });
-    const httpsAgent = new https.Agent({ keepAlive: true });
-
     this.client = axios.create({
       baseURL,
       timeout: options.timeout || 10000,
@@ -38,8 +34,6 @@ export class RecoClient {
         'x-api-key': options.apiKey,
         'Content-Type': 'application/json',
       },
-      httpAgent,
-      httpsAgent,
     });
   }
 
