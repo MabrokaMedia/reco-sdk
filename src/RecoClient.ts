@@ -67,7 +67,9 @@ export class RecoClient {
     if (!interaction.user_id || !interaction.item_id || !interaction.type || interaction.value === undefined || interaction.value === null) {
         throw new Error("RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value.");
     }
-    // Fire and forget behavior (await but don't hold up if void is fine, usually we want to know if it failed though)
+    if (interaction.type === "impression" && interaction.value !== 0) {
+        throw new Error("RecoSDK: Validation Error - Interaction type 'impression' must have value 0.");
+    }
     await this.client.post('/interactions', interaction);
   }
 
