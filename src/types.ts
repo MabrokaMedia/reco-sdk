@@ -25,7 +25,7 @@ export interface RecoInteraction {
   item_id: string;
   type: string;
   timestamp?: string; // ISO 8601
-  value?: number;
+  value: number;
   context?: Record<string, any>;
   [key: string]: any;
 }

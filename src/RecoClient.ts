@@ -64,8 +64,8 @@ export class RecoClient {
    * Track a single interaction
    */
   async trackInteraction(interaction: RecoInteraction): Promise<void> {
-    if (!interaction.user_id || !interaction.item_id || !interaction.type) {
-        throw new Error("RecoSDK: Validation Error - Interaction must have user_id, item_id, and type.");
+    if (!interaction.user_id || !interaction.item_id || !interaction.type || interaction.value === undefined || interaction.value === null) {
+        throw new Error("RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value.");
     }
     // Fire and forget behavior (await but don't hold up if void is fine, usually we want to know if it failed though)
     await this.client.post('/interactions', interaction);
