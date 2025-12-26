@@ -23,7 +23,7 @@ export class RecoClient {
       if (options.projectId) {
         baseURL = `${defaultHost}/api/v1/projects/${options.projectId}`;
       } else {
-        baseURL = defaultHost; // Fallback, though ideally projectId should be present
+        throw new Error("RecoSDK: 'projectId' is required in options unless 'baseUrl' is explicitly provided.");
       }
     }
 
