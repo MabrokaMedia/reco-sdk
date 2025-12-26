@@ -28,13 +28,12 @@ export class RecoClient {
     }
 
     // Optimization: Use Keep-Alive agents to reuse TCP connections
-    // This significantly reduces latency for sequential requests
     const httpAgent = new http.Agent({ keepAlive: true });
     const httpsAgent = new https.Agent({ keepAlive: true });
 
     this.client = axios.create({
       baseURL,
-      timeout: options.timeout || 10000, // Default 10s timeout
+      timeout: options.timeout || 10000,
       headers: {
         'x-api-key': options.apiKey,
         'Content-Type': 'application/json',
@@ -44,10 +43,25 @@ export class RecoClient {
     });
   }
 
+  private validateItem(item: RecoItem): void {
+    if (!item.item_id) {
+      throw new Error("RecoSDK: Validation Error - 'item_id' is required for item operations.");
+    }
+  }
+
+  private validateUser(user: RecoUser): void {
+    if (!user.user_id) {
+      throw new Error("RecoSDK: Validation Error - 'user_id' is required for user operations.");
+    }
+  }
+
   /**
    * Get recommendations for a user
    */
   async getRecommendations(req: RecommendationRequest): Promise<RecommendationResponse> {
+    if (!req.user_id) {
+       throw new Error("RecoSDK: Validation Error - 'user_id' is required for recommendations.");
+    }
     const response = await this.client.post<RecommendationResponse>('/recommendations', req);
     return response.data;
   }
@@ -56,9 +70,10 @@ export class RecoClient {
    * Track a single interaction
    */
   async trackInteraction(interaction: RecoInteraction): Promise<void> {
-    // Fire and forget: We await the call but return void. 
-    // In a real high-perf scenario, you might want to not await this at all in the main thread,
-    // or use a background queue. Here we keep it simple but fast via keep-alive.
+    if (!interaction.user_id || !interaction.item_id || !interaction.type) {
+        throw new Error("RecoSDK: Validation Error - Interaction must have user_id, item_id, and type.");
+    }
+    // Fire and forget behavior (await but don't hold up if void is fine, usually we want to know if it failed though)
     await this.client.post('/interactions', interaction);
   }
 
@@ -66,6 +81,7 @@ export class RecoClient {
    * Sync a single item
    */
   async upsertItem(item: RecoItem): Promise<void> {
+    this.validateItem(item);
     await this.client.post('/items', item);
   }
 
@@ -73,15 +89,18 @@ export class RecoClient {
    * Sync multiple items (Batch)
    */
   async batchUpsertItems(items: RecoItem[]): Promise<void> {
-    // Assuming the API supports batch upsert at /items/batch or similar
-    // If not, this would need to map over them, but let's assume a bulk endpoint exists or main endpoint handles arrays
-    await this.client.post('/items/batch', { items });
+    if (!Array.isArray(items)) {
+        throw new Error("RecoSDK: Validation Error - batchUpsertItems expects an array.");
+    }
+    items.forEach(i => this.validateItem(i));
+    await this.client.post('/items/bulk', { items });
   }
 
   /**
    * Sync a single user
    */
   async upsertUser(user: RecoUser): Promise<void> {
+    this.validateUser(user);
     await this.client.post('/users', user);
   }
 
@@ -89,6 +108,10 @@ export class RecoClient {
    * Sync multiple users (Batch)
    */
   async batchUpsertUsers(users: RecoUser[]): Promise<void> {
+    if (!Array.isArray(users)) {
+        throw new Error("RecoSDK: Validation Error - batchUpsertUsers expects an array.");
+    }
+    users.forEach(u => this.validateUser(u));
     await this.client.post('/users/bulk', { users });
   }
 
@@ -103,6 +126,7 @@ export class RecoClient {
    * Delete an item
    */
   async deleteItem(itemId: string): Promise<void> {
+    if (!itemId) throw new Error("RecoSDK: Validation Error - itemId is required.");
     await this.client.delete(`/items/${itemId}`);
   }
 
@@ -110,6 +134,7 @@ export class RecoClient {
    * Bulk delete items
    */
   async batchDeleteItems(itemIds: string[]): Promise<void> {
+    if (!itemIds || itemIds.length === 0) throw new Error("RecoSDK: Validation Error - itemIds array required.");
     await this.client.post('/items/bulk-delete', { item_ids: itemIds });
   }
 }
