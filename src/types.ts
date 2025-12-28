@@ -36,6 +36,7 @@ export interface RecommendationRequest {
   filters?: Record<string, any>;
   filter_expressions?: string[];
   filter_variables?: Record<string, any>;
+  booster_expressions?: string[]; // Added booster support
   cursor?: string;
 }
 
