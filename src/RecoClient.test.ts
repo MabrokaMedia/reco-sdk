@@ -166,6 +166,23 @@ describe('RecoClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/recommendations', request);
     });
 
+    it('should pass advanced retrieval controls through unchanged', async () => {
+      mockAxiosInstance.post.mockResolvedValue({ data: { recommendations: [] } });
+
+      const request: RecommendationRequest = {
+        user_id: 'user-456',
+        topK: 1500,
+        booster_expressions: ['if item.created_at >= now() - 86400 then 5 else 1'],
+        page_index: 1,
+        fatigue_score: 0.55,
+        adaptive_diversity_lambda: true,
+      };
+
+      await client.getRecommendations(request);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/recommendations', request);
+    });
+
     it('should handle API errors', async () => {
       mockAxiosInstance.post.mockRejectedValue(new Error('Network error'));
 

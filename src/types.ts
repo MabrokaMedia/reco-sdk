@@ -107,6 +107,8 @@ export interface RecommendationRequest {
   user_id: string;
   /** Maximum number of recommendations to return */
   limit?: number;
+  /** ANN retrieval topK override */
+  topK?: number;
   /** Filter expressions (DSL-based filters) */
   filter_expressions?: string[];
   /** Variables to use in filter expressions */
@@ -115,8 +117,37 @@ export interface RecommendationRequest {
   booster_expressions?: string[];
   /** Pagination cursor */
   cursor?: string;
+  /** Include per-signal scores in the response */
+  include_scores?: boolean;
+  /** Include explanation block in the response */
+  include_explanation?: boolean;
+  /** Include trace block in the response */
+  include_trace?: boolean;
+  /** Optional ranking configuration object */
+  ranking_config?: Record<string, any>;
+  /** Optional target node type filter */
+  target_node_type?: string | string[];
+  /** Optional alias for target node type filter */
+  node_type?: string | string[];
   /** Seed item ID for ANN/Similar items search */
   seed_item_id?: string;
+  /** Whether to personalize similar-item retrieval with the user embedding */
+  personalize_similar_items?: boolean;
+  /** User-embedding mix weight for personalized similar items */
+  personalization_weight?: number;
+  /** Feed/page depth for adaptive diversity */
+  page_index?: number;
+  /** Explicit fatigue score in [0,1] */
+  fatigue_score?: number;
+  /** Optional fatigue signals for adaptive diversity */
+  fatigue_signals?: {
+    skipRate?: number;
+    shortDwellRate?: number;
+    noClickRate?: number;
+    consecutiveSkips?: number;
+  };
+  /** Enable or disable adaptive diversity lambda */
+  adaptive_diversity_lambda?: boolean;
   /** @deprecated Use filter_expressions instead */
   filters?: Record<string, any>;
 }

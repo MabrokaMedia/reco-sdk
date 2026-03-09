@@ -238,6 +238,38 @@ describe('Types', () => {
       expect(request.seed_item_id).toBe('item-789');
     });
 
+    it('should allow advanced retrieval and diversity controls', () => {
+      const request: RecommendationRequest = {
+        user_id: 'user-456',
+        topK: 1200,
+        booster_expressions: ['if item.created_at >= now() - 86400 then 5 else 1'],
+        include_scores: true,
+        include_explanation: true,
+        include_trace: false,
+        ranking_config: { sessionWeight: 0.25 },
+        seed_item_id: 'item-789',
+        personalize_similar_items: true,
+        personalization_weight: 0.3,
+        page_index: 2,
+        fatigue_score: 0.65,
+        fatigue_signals: {
+          skipRate: 0.4,
+          shortDwellRate: 0.2,
+          noClickRate: 0.3,
+          consecutiveSkips: 2,
+        },
+        adaptive_diversity_lambda: true,
+      };
+
+      expect(request.topK).toBe(1200);
+      expect(request.booster_expressions).toHaveLength(1);
+      expect(request.include_scores).toBe(true);
+      expect(request.personalize_similar_items).toBe(true);
+      expect(request.fatigue_score).toBeCloseTo(0.65);
+      expect(request.fatigue_signals?.consecutiveSkips).toBe(2);
+      expect(request.adaptive_diversity_lambda).toBe(true);
+    });
+
     it('should allow request with all options', () => {
       const request: RecommendationRequest = {
         user_id: 'user-456',
