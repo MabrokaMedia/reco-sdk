@@ -115,6 +115,8 @@ export interface RecommendationRequest {
   booster_expressions?: string[];
   /** Pagination cursor */
   cursor?: string;
+  /** Seed item ID for ANN/Similar items search */
+  seed_item_id?: string;
   /** @deprecated Use filter_expressions instead */
   filters?: Record<string, any>;
 }

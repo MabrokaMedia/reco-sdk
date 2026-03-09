@@ -153,6 +153,19 @@ describe('RecoClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/recommendations', request);
     });
 
+    it('should pass seed_item_id for similar item recommendations', async () => {
+      mockAxiosInstance.post.mockResolvedValue({ data: { recommendations: [] } });
+
+      const request: RecommendationRequest = {
+        user_id: 'user-456',
+        seed_item_id: 'item-789',
+      };
+
+      await client.getRecommendations(request);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/recommendations', request);
+    });
+
     it('should handle API errors', async () => {
       mockAxiosInstance.post.mockRejectedValue(new Error('Network error'));
 
@@ -191,7 +204,7 @@ describe('RecoClient', () => {
       } as RecoInteraction;
 
       await expect(client.trackInteraction(interaction)).rejects.toThrow(
-        "RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value."
+        "RecoSDK: Validation Error - 'user_id' is required for interactions."
       );
     });
 
@@ -203,7 +216,7 @@ describe('RecoClient', () => {
       } as RecoInteraction;
 
       await expect(client.trackInteraction(interaction)).rejects.toThrow(
-        "RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value."
+        "RecoSDK: Validation Error - 'item_id' is required for interactions."
       );
     });
 
@@ -215,7 +228,7 @@ describe('RecoClient', () => {
       } as RecoInteraction;
 
       await expect(client.trackInteraction(interaction)).rejects.toThrow(
-        "RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value."
+        "RecoSDK: Validation Error - 'type' is required for interactions."
       );
     });
 
@@ -227,7 +240,7 @@ describe('RecoClient', () => {
       } as RecoInteraction;
 
       await expect(client.trackInteraction(interaction)).rejects.toThrow(
-        "RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value."
+        "RecoSDK: Validation Error - 'value' is required for interactions."
       );
     });
 
@@ -240,7 +253,7 @@ describe('RecoClient', () => {
       };
 
       await expect(client.trackInteraction(interaction)).rejects.toThrow(
-        "RecoSDK: Validation Error - Interaction must have user_id, item_id, type, and value."
+        "RecoSDK: Validation Error - 'value' is required for interactions."
       );
     });
 
@@ -450,6 +463,39 @@ describe('RecoClient', () => {
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/users/bulk', { users: [] });
     });
+
+    it('should fall back to single-user upserts when batch endpoint returns 404', async () => {
+      const users: RecoUser[] = [
+        { user_id: 'user-1' },
+        { user_id: 'user-2' },
+      ];
+
+      mockAxiosInstance.post
+        .mockRejectedValueOnce({
+          response: { status: 404 },
+          message: 'Request failed with status code 404',
+        })
+        .mockResolvedValue({ data: {} });
+
+      await client.batchUpsertUsers(users);
+
+      expect(mockAxiosInstance.post).toHaveBeenNthCalledWith(1, '/users/bulk', { users });
+      expect(mockAxiosInstance.post).toHaveBeenNthCalledWith(2, '/users', users[0]);
+      expect(mockAxiosInstance.post).toHaveBeenNthCalledWith(3, '/users', users[1]);
+    });
+
+    it('should rethrow non-404 batch errors', async () => {
+      const users: RecoUser[] = [
+        { user_id: 'user-1' },
+      ];
+      const error = new Error('Internal server error');
+
+      mockAxiosInstance.post.mockRejectedValue(error);
+
+      await expect(client.batchUpsertUsers(users)).rejects.toThrow('Internal server error');
+      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/users/bulk', { users });
+    });
   });
 
   describe('batchTrackInteractions', () => {
@@ -527,22 +573,10 @@ describe('RecoClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/items/bulk-delete', { item_ids: itemIds });
     });
 
-    it('should throw error when itemIds is empty array', async () => {
-      await expect(client.batchDeleteItems([])).rejects.toThrow(
-        "RecoSDK: Validation Error - itemIds array required."
-      );
-    });
-
-    it('should throw error when itemIds is undefined', async () => {
-      await expect(client.batchDeleteItems(undefined as any)).rejects.toThrow(
-        "RecoSDK: Validation Error - itemIds array required."
-      );
-    });
-
-    it('should throw error when itemIds is null', async () => {
-      await expect(client.batchDeleteItems(null as any)).rejects.toThrow(
-        "RecoSDK: Validation Error - itemIds array required."
-      );
+    it('should throw error when itemIds is empty array, undefined or null', async () => {
+      await expect(client.batchDeleteItems([])).rejects.toThrow("RecoSDK: Validation Error - itemIds array is required and cannot be empty.");
+      await expect(client.batchDeleteItems(undefined as any)).rejects.toThrow("RecoSDK: Validation Error - itemIds array is required and cannot be empty.");
+      await expect(client.batchDeleteItems(null as any)).rejects.toThrow("RecoSDK: Validation Error - itemIds array is required and cannot be empty.");
     });
   });
 
@@ -587,22 +621,10 @@ describe('RecoClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/users/bulk-delete', { user_ids: userIds });
     });
 
-    it('should throw error when userIds is empty array', async () => {
-      await expect(client.batchDeleteUsers([])).rejects.toThrow(
-        "RecoSDK: Validation Error - userIds array required."
-      );
-    });
-
-    it('should throw error when userIds is undefined', async () => {
-      await expect(client.batchDeleteUsers(undefined as any)).rejects.toThrow(
-        "RecoSDK: Validation Error - userIds array required."
-      );
-    });
-
-    it('should throw error when userIds is null', async () => {
-      await expect(client.batchDeleteUsers(null as any)).rejects.toThrow(
-        "RecoSDK: Validation Error - userIds array required."
-      );
+    it('should throw error when userIds is empty array, undefined or null', async () => {
+      await expect(client.batchDeleteUsers([])).rejects.toThrow("RecoSDK: Validation Error - userIds array is required and cannot be empty.");
+      await expect(client.batchDeleteUsers(undefined as any)).rejects.toThrow("RecoSDK: Validation Error - userIds array is required and cannot be empty.");
+      await expect(client.batchDeleteUsers(null as any)).rejects.toThrow("RecoSDK: Validation Error - userIds array is required and cannot be empty.");
     });
   });
 

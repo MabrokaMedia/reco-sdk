@@ -101,6 +101,25 @@ export class RecoClient {
     }
   }
 
+  private isMissingEndpointError(error: unknown): boolean {
+    const statusCode =
+      axios.isAxiosError(error)
+        ? error.response?.status
+        : (error as { response?: { status?: number } } | null | undefined)?.response?.status;
+
+    if (statusCode === 404 || statusCode === 405) {
+      return true;
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error
+          ? String((error as { message?: unknown }).message ?? '')
+          : String(error ?? '');
+    return /status code (404|405)/i.test(message);
+  }
+
   // ===========================================================================
   // Recommendation Operations
   // ===========================================================================
@@ -220,7 +239,18 @@ export class RecoClient {
       throw new Error("RecoSDK: Validation Error - batchUpsertUsers expects an array.");
     }
     users.forEach(u => this.validateUser(u));
-    await this.client.post('/users/bulk', { users });
+
+    try {
+      await this.client.post('/users/bulk', { users });
+    } catch (error) {
+      if (!this.isMissingEndpointError(error)) {
+        throw error;
+      }
+
+      for (const user of users) {
+        await this.upsertUser(user);
+      }
+    }
   }
 
   /**

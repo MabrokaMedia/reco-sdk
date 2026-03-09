@@ -77,11 +77,13 @@ describe('Types', () => {
     it('should allow custom properties', () => {
       const item: RecoItem = {
         item_id: 'item-123',
-        custom_field: 'custom_value',
-        another_field: 123,
+        attributes: {
+          custom_field: 'custom_value',
+          another_field: 123,
+        },
       };
-      expect(item.custom_field).toBe('custom_value');
-      expect(item.another_field).toBe(123);
+      expect(item.attributes?.custom_field).toBe('custom_value');
+      expect(item.attributes?.another_field).toBe(123);
     });
   });
 
@@ -110,11 +112,12 @@ describe('Types', () => {
     it('should allow custom properties', () => {
       const user: RecoUser = {
         user_id: 'user-456',
-        email: 'user@example.com',
-        preferences: ['music', 'sports'],
+        attributes: {
+          preferences: ['music', 'sports'],
+        },
       };
-      expect(user.email).toBe('user@example.com');
-      expect(user.preferences).toEqual(['music', 'sports']);
+      expect(user.user_id).toBe('user-456');
+      expect(user.attributes?.preferences).toEqual(['music', 'sports']);
     });
   });
 
@@ -165,9 +168,11 @@ describe('Types', () => {
         item_id: 'item-123',
         type: 'view',
         value: 1,
-        session_id: 'session-789',
+        context: {
+          session_id: 'session-789',
+        },
       };
-      expect(interaction.session_id).toBe('session-789');
+      expect(interaction.context?.session_id).toBe('session-789');
     });
   });
 
@@ -225,6 +230,14 @@ describe('Types', () => {
       expect(request.cursor).toBe('eyJvZmZzZXQiOjEwfQ==');
     });
 
+    it('should allow request with seed_item_id for similar items', () => {
+      const request: RecommendationRequest = {
+        user_id: 'user-456',
+        seed_item_id: 'item-789',
+      };
+      expect(request.seed_item_id).toBe('item-789');
+    });
+
     it('should allow request with all options', () => {
       const request: RecommendationRequest = {
         user_id: 'user-456',
@@ -258,8 +271,8 @@ describe('Types', () => {
       const response: RecommendationResponse = {
         recommendations: [],
         items: [
-          { id: 'item-1', score: 0.95 },
-          { id: 'item-2', score: 0.87 },
+          { item_id: 'item-1', score: 0.95 },
+          { item_id: 'item-2', score: 0.87 },
         ],
       };
       expect(response.items).toHaveLength(2);
