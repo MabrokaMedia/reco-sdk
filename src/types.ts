@@ -148,6 +148,14 @@ export interface RecommendationRequest {
   };
   /** Enable or disable adaptive diversity lambda */
   adaptive_diversity_lambda?: boolean;
+  /**
+   * Response field projection. When supplied, only the listed fields are
+   * included in each item object, reducing payload size.
+   * Always includes item_id regardless of what is listed.
+   * Examples: ['item_id', 'score'] | ['item_id', 'score', 'attributes.title', 'attributes.image_url']
+   * Use bare 'attributes' to include the full attributes object.
+   */
+  fields?: string[];
   /** @deprecated Use filter_expressions instead */
   filters?: Record<string, any>;
 }
